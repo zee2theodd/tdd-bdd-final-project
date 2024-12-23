@@ -44,9 +44,21 @@ def step_impl(context):
         assert(context.resp.status_code == HTTP_204_NO_CONTENT)
 
     #
-    # load the database with new products
+    # Load the database with new products
     #
     for row in context.table:
-        #
-        # ADD YOUR CODE HERE TO CREATE PRODUCTS VIA THE REST API
-        #
+        # Create a payload from the row data
+        payload = {
+            "name": row['name'],
+            "description": row['description'],
+            "price": float(row['price']),
+            "available": row['available'].lower() == 'true',
+            "category": row['category'],
+        }
+
+        # Send POST request to the REST API to create a product
+        context.resp = requests.post(rest_endpoint, json=payload)
+
+        # Ensure that the product was created successfully
+        assert context.resp.status_code == HTTP_201_CREATED, \
+            f"Failed to create product: {context.resp.text}"
